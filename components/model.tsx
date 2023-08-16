@@ -1,19 +1,19 @@
 import React, { Suspense, useEffect, useRef } from "react";
-import { Canvas, useLoader } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import {
   PresentationControls,
   PerspectiveCamera,
   Environment,
+  useGLTF,
 } from "@react-three/drei";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { useControls } from "leva";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 const ModelComponent = () => {
-  const gltf = useLoader(GLTFLoader, "/test2.glb");
-  const modelRef = useRef();
+  const gltf = useGLTF("/test2.glb");
+  const modelRef = useRef(null);
   const { position, rotation } = useControls("Model", {
     position: { value: [0, 0, 0], step: 0.1 },
     rotation: { value: [0, 0, 0], step: 0.1 },
@@ -23,15 +23,17 @@ const ModelComponent = () => {
     if (!modelRef.current) {
       return;
     }
+
     const t1 = gsap.timeline({});
     const scrollDirection = { value: 0 };
+    const { position, rotation } = modelRef.current;
 
-    t1.to(modelRef.current.position, {
+    t1.to(position, {
       z: 22,
       x: 0,
       y: 0,
       onStart: () => {
-        gsap.to(modelRef.current.rotation, {
+        gsap.to(rotation, {
           y: 10,
           x: 0,
           z: 0,
@@ -49,13 +51,14 @@ const ModelComponent = () => {
       scrub: 2,
 
       pin: true,
-      anticipatePin: true,
+      anticipatePin: true as any,
       // Check direction of scroll
       onUpdate: (self) => {
         scrollDirection.value = self.direction;
       },
     });
   }, [modelRef.current]);
+
   return (
     <mesh ref={modelRef}>
       <primitive
