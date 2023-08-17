@@ -51,7 +51,7 @@ const ModelComponent = () => {
         gsap.to(modelRef?.current?.rotation, {
           y: 1.04,
           scrollTrigger: {
-            trigger: ".trigger",
+            trigger: ".trigger1",
             start: "top top",
             end: "center center",
             scrub: true,
@@ -67,7 +67,7 @@ const ModelComponent = () => {
         gsap.to(modelRef?.current?.rotation, {
           y: -1.64,
           scrollTrigger: {
-            trigger: ".trigger",
+            trigger: ".trigger2",
             start: "center center",
             end: "bottom botom",
             scrub: true,
@@ -136,17 +136,17 @@ const MovingLight = () => {
     }
   });
 
-  return <spotLight ref={lightRef} intensity={2} color='white' castShadow />;
+  return <spotLight ref={lightRef} intensity={2} color="white" castShadow />;
 };
 
 const Model = () => {
   return (
-    <div className=' w-[80vw] h-auto relative bg-black'>
-      <div className='fixed w-screen z-[30] h-screen overflow-x-hidden bg-black'>
+    <div className=" w-[80vw] h-auto relative bg-black">
+      <div className="fixed w-screen z-[30] h-screen overflow-x-hidden bg-black">
         <Canvas shadows>
           <ambientLight intensity={1} />
           <directionalLight position={[0, 10, 0]} intensity={1} castShadow />
-          <Environment preset='sunset' />
+          <Environment preset="sunset" />
           <pointLight position={[0, 0, 0]} intensity={1} />
           <pointLight position={[0, 0, 10]} intensity={1} />
 
@@ -161,10 +161,14 @@ const Model = () => {
       </div>
 
       <section
-        className='trigger'
+        className="trigger"
         data-scroll-section
         style={{ height: "1000vh" }}
-      ></section>
+      >
+        <div style={{ height: "33.33%" }} className="trigger1"></div>
+        <div style={{ height: "33.33%" }} className="trigger2"></div>
+        <div style={{ height: "33.33%" }} className="trigger3"></div>
+      </section>
     </div>
   );
 };
