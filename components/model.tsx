@@ -13,9 +13,22 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import * as THREE from "three";
 gsap.registerPlugin(ScrollTrigger);
 
+//initial
+//{"position":[2,0,2.2]}
+//{"rotation":[0,-1.8,3.469446951953614e-18]}
+
+//second
+//{"position":[-0.6,-0.7999999999999994,4.2]}
+//{"rotation":[0,1.0400000000000011,3.469446951953614e-18]}
+
+//third
+//{"position":[0.49999999999999994,-0.7999999999999994,4.299999999999999]}
+//{"rotation":[0,-1.64,0]}
+
 const ModelComponent = () => {
   const gltf = useGLTF("/test2.glb");
-  const modelRef = useRef(null);
+  const modelRef: any = useRef(null);
+  const { camera } = useThree();
   // const { position, rotation } = useControls("Model", {
   //   position: { value: [2, 0, 1.7], step: 0.1 },
   //   rotation: { value: [0, -1.45, 0], step: 0.01 },
@@ -25,36 +38,56 @@ const ModelComponent = () => {
     if (!modelRef.current) {
       return;
     }
-    const t1 = gsap.timeline({ paused: true });
-    const { position, rotation } = modelRef.current;
+    const t1 = gsap.timeline();
+    let scrollDirection = 1;
 
-    // Animation for the first section
-    t1.to(position, {
-      x: -17,
-      z: 21,
-      y: -5,
-      duration: 3,
+    // // Animation for the first section
+    t1.to(modelRef?.current?.position, {
+      x: -0.6,
+      y: -0.84,
+      z: 4.2,
+      duration: 1,
+      onStart: () => {
+        gsap.to(modelRef?.current?.rotation, {
+          y: 1.04,
+          scrollTrigger: {
+            trigger: ".trigger",
+            start: "top top",
+            end: "center center",
+            scrub: true,
+          },
+        });
+      },
+    }).to(modelRef?.current?.position, {
+      x: 0.5,
+      y: -0.8,
+      z: 4.3,
+      duration: 1,
+      onStart: () => {
+        gsap.to(modelRef?.current?.rotation, {
+          y: -1.64,
+          scrollTrigger: {
+            trigger: ".trigger",
+            start: "center center",
+            end: "bottom botom",
+            scrub: true,
+          },
+        });
+      },
     });
-
-    // .to(
-    //   rotation,
-    //   {
-    //     y: 5.5,
-    //     x: 0.5,
-    //     z: 0,
-    //     duration: 1,
-    //   },
-    //   "<"
-    // )
 
     ScrollTrigger.create({
       animation: t1,
-      trigger: "#trigger",
+      trigger: ".trigger",
       start: "top top",
-      end: "5000px", // Adjust this value to control the end of the first section
+      end: "+=6000px", // Adjust this value to control the end of the first section
       scrub: true,
       onUpdate: (self) => {
-        const progress = self.progress;
+        if (self.direction > 0) {
+          scrollDirection = 1;
+        } else {
+          scrollDirection = -1;
+        }
       },
     });
 
@@ -80,8 +113,8 @@ const ModelComponent = () => {
       <primitive
         ref={modelRef}
         object={gltf.scene}
-        position={[2, 0, 1.7]}
-        rotation={[0, -1.45, 0]}
+        position={[2, 0, 2.2]}
+        rotation={[0, -Math.PI / 2, 0]}
       />
     </mesh>
   );
@@ -103,33 +136,34 @@ const MovingLight = () => {
     }
   });
 
-  return <spotLight ref={lightRef} intensity={2} color="white" castShadow />;
+  return <spotLight ref={lightRef} intensity={2} color='white' castShadow />;
 };
 
 const Model = () => {
   return (
-    <div className="h-screen w-[80vw] relative bg-black">
-      <div className="fixed w-screen z-[30] h-screen overflow-x-hidden bg-black">
-        <Canvas camera={{ position: [0, 0, 5], fov: 75 }} shadows>
+    <div className=' w-[80vw] h-auto relative bg-black'>
+      <div className='fixed w-screen z-[30] h-screen overflow-x-hidden bg-black'>
+        <Canvas shadows>
           <ambientLight intensity={1} />
-
-          <Environment preset="warehouse" />
+          <directionalLight position={[0, 10, 0]} intensity={1} castShadow />
+          <Environment preset='sunset' />
+          <pointLight position={[0, 0, 0]} intensity={1} />
+          <pointLight position={[0, 0, 10]} intensity={1} />
 
           {/* <PresentationControls> */}
 
           <Suspense fallback={null}>
-            <MovingLight />
-            <MovingLight />
             <ModelComponent />
           </Suspense>
 
           {/* </PresentationControls> */}
         </Canvas>
       </div>
+
       <section
-        id="trigger"
+        className='trigger'
         data-scroll-section
-        style={{ height: "20vh" }}
+        style={{ height: "1000vh" }}
       ></section>
     </div>
   );
