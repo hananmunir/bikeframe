@@ -1,5 +1,6 @@
 import React, { Suspense, useEffect, useRef } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { useThree } from "@react-three/fiber";
 import {
   PresentationControls,
   PerspectiveCamera,
@@ -9,94 +10,128 @@ import {
 import { useControls } from "leva";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import * as THREE from "three";
 gsap.registerPlugin(ScrollTrigger);
 
 const ModelComponent = () => {
   const gltf = useGLTF("/test2.glb");
   const modelRef = useRef(null);
-  const { position, rotation } = useControls("Model", {
-    position: { value: [0, 0, 0], step: 0.1 },
-    rotation: { value: [0, 0, 0], step: 0.1 },
-  });
+  // const { position, rotation } = useControls("Model", {
+  //   position: { value: [2, 0, 1.7], step: 0.1 },
+  //   rotation: { value: [0, -1.45, 0], step: 0.01 },
+  // });
 
   useEffect(() => {
     if (!modelRef.current) {
       return;
     }
-
-    const t1 = gsap.timeline({});
-    const scrollDirection = { value: 0 };
+    const t1 = gsap.timeline({ paused: true });
     const { position, rotation } = modelRef.current;
 
+    // Animation for the first section
     t1.to(position, {
-      z: 22,
-      x: 0,
-      y: 0,
-      onStart: () => {
-        gsap.to(rotation, {
-          y: 10,
-          x: 0,
-          z: 0,
-          duration: 1,
-        });
-      },
-      duration: 1,
+      x: -17,
+      z: 21,
+      y: -5,
+      duration: 3,
     });
+
+    // .to(
+    //   rotation,
+    //   {
+    //     y: 5.5,
+    //     x: 0.5,
+    //     z: 0,
+    //     duration: 1,
+    //   },
+    //   "<"
+    // )
 
     ScrollTrigger.create({
       animation: t1,
       trigger: "#trigger",
       start: "top top",
-      end: `+=4000`, // Adjust this value to control the total distance of the scroll animation
-      scrub: 2,
-
-      pin: true,
-      anticipatePin: true as any,
-      // Check direction of scroll
+      end: "5000px", // Adjust this value to control the end of the first section
+      scrub: true,
       onUpdate: (self) => {
-        scrollDirection.value = self.direction;
+        const progress = self.progress;
       },
+    });
+
+    gltf.scene.traverse((node) => {
+      if (node instanceof THREE.Mesh) {
+        const mesh = node as THREE.Mesh;
+        const material = (node as THREE.Mesh)
+          .material as THREE.MeshStandardMaterial;
+        if (material) {
+          material.roughness = 0.4;
+        }
+
+        // Shadows
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+      }
     });
   }, [modelRef.current]);
 
+  console.log(gltf.scene);
   return (
-    <mesh ref={modelRef}>
+    <mesh castShadow receiveShadow>
       <primitive
+        ref={modelRef}
         object={gltf.scene}
-        position={[0, 0, 0]}
-        rotation={[0, 0, 0]}
-        scale={1}
+        position={[2, 0, 1.7]}
+        rotation={[0, -1.45, 0]}
       />
     </mesh>
   );
 };
 
+const MovingLight = () => {
+  const lightRef = useRef<THREE.SpotLight>(null);
+
+  // Use the useFrame hook to update the light position on each frame
+  useFrame((state, delta) => {
+    if (lightRef.current) {
+      // Update the light's position here
+      // You can change the light's position based on time or any other parameter
+      const time = state.clock.elapsedTime;
+      const radius = 15;
+      const xPos = radius * Math.cos(time * 0.5);
+      const zPos = radius * Math.sin(time * 0.5);
+      lightRef.current.position.set(xPos, 0, zPos);
+    }
+  });
+
+  return <spotLight ref={lightRef} intensity={2} color="white" castShadow />;
+};
+
 const Model = () => {
   return (
-    <>
-      <div className="h-screen w-[80vw] z-30 relative bg-black">
-        <div className="fixed w-screen h-screen top-0 overflow-x-hidden  bg-black">
-          <Canvas>
-            <ambientLight intensity={0.5} />
-            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
-            <pointLight position={[-10, -10, -10]} />
-            <Environment preset="city" />
-            <PresentationControls>
-              <group position={[0, -1, 0]}>
-                <Suspense fallback={null}>
-                  <ModelComponent />
-                </Suspense>
-              </group>
-            </PresentationControls>
-          </Canvas>
-        </div>
+    <div className="h-screen w-[80vw] relative bg-black">
+      <div className="fixed w-screen z-[30] h-screen overflow-x-hidden bg-black">
+        <Canvas camera={{ position: [0, 0, 5], fov: 75 }} shadows>
+          <ambientLight intensity={1} />
+
+          <Environment preset="warehouse" />
+
+          {/* <PresentationControls> */}
+
+          <Suspense fallback={null}>
+            <MovingLight />
+            <MovingLight />
+            <ModelComponent />
+          </Suspense>
+
+          {/* </PresentationControls> */}
+        </Canvas>
       </div>
       <section
-        className="trigger"
+        id="trigger"
         data-scroll-section
-        style={{ height: "50vh" }}
+        style={{ height: "20vh" }}
       ></section>
-    </>
+    </div>
   );
 };
 
