@@ -32,6 +32,26 @@ const ModelComponent = () => {
     }
   });
 
+  const { position, rotation } = useControls("Camera", {
+    position: {
+      value: [0, 0, 5],
+      step: 0.1,
+    },
+    rotation: {
+      value: [0, 0, 0],
+      step: 0.1,
+    },
+  });
+
+  camera.position.set(position[0], position[1], position[2]);
+  camera.rotation.set(rotation[0], rotation[1], rotation[2]);
+  if (modelRef.current)
+    camera.lookAt(
+      modelRef?.current?.position.x,
+      0,
+      modelRef?.current?.position.z
+    );
+
   let progress = 0;
   useEffect(() => {
     if (!modelRef.current) {
@@ -39,80 +59,57 @@ const ModelComponent = () => {
     }
     const t1 = gsap.timeline();
 
-    // // Animation for the first section
-    t1.to(modelRef?.current?.position, {
-      x: -0.8,
-      y: -0.8,
-      z: 4,
+    t1.to(camera.position, {
+      x: 1.6,
+      y: 3.3,
+      z: -4.6,
       duration: 1,
-      ease: "power.easeInOut",
-      onStart: () => {
-        const firstAnimConfig = {
-          trigger: ".trigger1",
-          start: "top top",
-          end: "bottom bottom",
-          scrub: true,
-        };
-        gsap.to(modelRef?.current?.rotation, {
-          y: 1.04,
-          ease: "power.easeInOut",
-          delay: 0.5,
-          scrollTrigger: firstAnimConfig,
-        });
-        gsap.to(camera.position, {
-          y: 0.4,
-          z: 4.8,
-          ease: "power.easeInOut",
-          delay: 1,
-          scrollTrigger: firstAnimConfig,
-        });
-        gsap.to(camera.rotation, {
-          z: 0.2,
-          x: -0.4,
-          ease: "power.easeInOut",
-          delay: 1,
-          scrollTrigger: firstAnimConfig,
-        });
+      onUpdate: () => {
+        camera.lookAt(
+          modelRef.current.position.x,
+          0,
+          modelRef.current.position.z
+        );
       },
     })
-      .to(modelRef?.current?.position, {
-        x: 0.9,
-        y: -0.8,
-        z: 4,
+      .to(camera.position, {
+        x: 1.2,
+        y: 3.3,
+        z: -6.6,
+        delay: 0.2,
         duration: 1,
-        ease: "power.easeInOut",
-        onStart: () => {
-          const secondAnimConfig = {
-            trigger: ".trigger2",
-            start: "top top",
-            end: "bottom botom",
-            scrub: true,
-          };
-          gsap.to(modelRef?.current?.rotation, {
-            y: -1.64,
-            ease: "power.easeInOut",
-            scrollTrigger: secondAnimConfig,
-          });
-          gsap.to(camera.position, {
-            y: 0,
-            z: 5,
-            ease: "power.easeInOut",
-            delay: 1,
-            scrollTrigger: secondAnimConfig,
-          });
-          gsap.to(camera.rotation, {
-            z: 0,
-            x: 0,
-            ease: "power.easeInOut",
-            delay: 1,
-            scrollTrigger: secondAnimConfig,
-          });
+        onUpdate: () => {
+          camera.lookAt(
+            modelRef.current.position.x,
+            0,
+            modelRef.current.position.z
+          );
         },
       })
-      .to(modelRef?.current?.position, {
-        z: 0,
-        x: 5,
-        ease: "power.easeInOut",
+      .to(camera.position, {
+        x: 3.1,
+        y: 3,
+        z: -8.6,
+        delay: 0.2,
+        duration: 1,
+        onUpdate: () => {
+          camera.lookAt(
+            modelRef.current.position.x,
+            0,
+            modelRef.current.position.z
+          );
+        },
+      })
+      .to(camera.position, {
+        z: -20,
+        delay: 0.5,
+        onUpdate: () => {
+          camera.lookAt(
+            modelRef.current.position.x,
+            0,
+            modelRef.current.position.z
+          );
+        },
       });
 
     ScrollTrigger.create({
@@ -145,10 +142,8 @@ const ModelComponent = () => {
 
   return (
     <mesh
-      position={[2, 0, 2.2]}
+      position={[2.5, 0, -5.5]}
       rotation={[0, -Math.PI / 2, 0]}
-      // position={position}
-      // rotation={rotation}
       ref={modelRef}
       castShadow
       receiveShadow
@@ -182,7 +177,13 @@ const Model = () => {
   return (
     <div className=' w-[80vw] h-auto relative bg-black'>
       <div className='fixed w-screen z-[30] h-screen overflow-x-hidden bg-black'>
-        <Canvas shadows>
+        <Canvas
+          camera={{
+            position: [0, 0, 5],
+            fov: 25,
+          }}
+          shadows
+        >
           <ambientLight intensity={1} />
           <directionalLight position={[0, 10, 0]} intensity={1} castShadow />
           <Environment preset='sunset' />
