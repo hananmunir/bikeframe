@@ -13,68 +13,107 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import * as THREE from "three";
 gsap.registerPlugin(ScrollTrigger);
 
-//initial
-//{"position":[2,0,2.2]}
-//{"rotation":[0,-1.8,3.469446951953614e-18]}
-
-//second
-//{"position":[-0.6,-0.7999999999999994,4.2]}
-//{"rotation":[0,1.0400000000000011,3.469446951953614e-18]}
-
-//third
-//{"position":[0.49999999999999994,-0.7999999999999994,4.299999999999999]}
-//{"rotation":[0,-1.64,0]}
-
 const ModelComponent = () => {
-  const gltf = useGLTF("/test2.glb");
+  const gltf: any = useGLTF("/test2.glb");
   const modelRef: any = useRef(null);
   const { camera } = useThree();
-  // const { position, rotation } = useControls("Model", {
-  //   position: { value: [2, 0, 1.7], step: 0.1 },
-  //   rotation: { value: [0, -1.45, 0], step: 0.01 },
-  // });
+  gltf.scene.traverse((node: any) => {
+    if (node instanceof THREE.Mesh) {
+      const mesh = node as THREE.Mesh;
+      const material = (node as THREE.Mesh)
+        .material as THREE.MeshStandardMaterial;
+      if (material) {
+        material.roughness = 0.4;
+      }
 
+      // Shadows
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+    }
+  });
+
+  let progress = 0;
   useEffect(() => {
     if (!modelRef.current) {
       return;
     }
     const t1 = gsap.timeline();
-    let scrollDirection = 1;
 
     // // Animation for the first section
     t1.to(modelRef?.current?.position, {
-      x: -0.6,
-      y: -0.84,
-      z: 4.2,
+      x: -0.8,
+      y: -0.8,
+      z: 4,
       duration: 1,
+      ease: "power.easeInOut",
       onStart: () => {
+        const firstAnimConfig = {
+          trigger: ".trigger1",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: true,
+        };
         gsap.to(modelRef?.current?.rotation, {
           y: 1.04,
-          scrollTrigger: {
-            trigger: ".trigger1",
-            start: "top top",
-            end: "center center",
-            scrub: true,
-          },
+          ease: "power.easeInOut",
+          delay: 0.5,
+          scrollTrigger: firstAnimConfig,
+        });
+        gsap.to(camera.position, {
+          y: 0.4,
+          z: 4.8,
+          ease: "power.easeInOut",
+          delay: 1,
+          scrollTrigger: firstAnimConfig,
+        });
+        gsap.to(camera.rotation, {
+          z: 0.2,
+          x: -0.4,
+          ease: "power.easeInOut",
+          delay: 1,
+          scrollTrigger: firstAnimConfig,
         });
       },
-    }).to(modelRef?.current?.position, {
-      x: 0.5,
-      y: -0.8,
-      z: 4.3,
-      duration: 1,
-      onStart: () => {
-        gsap.to(modelRef?.current?.rotation, {
-          y: -1.64,
-          scrollTrigger: {
+    })
+      .to(modelRef?.current?.position, {
+        x: 0.9,
+        y: -0.8,
+        z: 4,
+        duration: 1,
+        ease: "power.easeInOut",
+        onStart: () => {
+          const secondAnimConfig = {
             trigger: ".trigger2",
-            start: "center center",
+            start: "top top",
             end: "bottom botom",
             scrub: true,
-          },
-        });
-      },
-    });
+          };
+          gsap.to(modelRef?.current?.rotation, {
+            y: -1.64,
+            ease: "power.easeInOut",
+            scrollTrigger: secondAnimConfig,
+          });
+          gsap.to(camera.position, {
+            y: 0,
+            z: 5,
+            ease: "power.easeInOut",
+            delay: 1,
+            scrollTrigger: secondAnimConfig,
+          });
+          gsap.to(camera.rotation, {
+            z: 0,
+            x: 0,
+            ease: "power.easeInOut",
+            delay: 1,
+            scrollTrigger: secondAnimConfig,
+          });
+        },
+      })
+      .to(modelRef?.current?.position, {
+        z: 0,
+        x: 5,
+        ease: "power.easeInOut",
+      });
 
     ScrollTrigger.create({
       animation: t1,
@@ -83,39 +122,39 @@ const ModelComponent = () => {
       end: "+=6000px", // Adjust this value to control the end of the first section
       scrub: true,
       onUpdate: (self) => {
-        if (self.direction > 0) {
-          scrollDirection = 1;
-        } else {
-          scrollDirection = -1;
-        }
+        progress = self.progress;
       },
     });
+  }, [modelRef.current]);
 
-    gltf.scene.traverse((node) => {
+  useFrame((delta) => {
+    gltf.scene.traverse((node: any) => {
       if (node instanceof THREE.Mesh) {
         const mesh = node as THREE.Mesh;
         const material = (node as THREE.Mesh)
           .material as THREE.MeshStandardMaterial;
         if (material) {
-          material.roughness = 0.4;
+          material.transparent = true;
+          if (progress > 0.78) material.opacity = 1 - (progress - 0.78) * 5;
         }
-
-        // Shadows
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
       }
     });
-  }, [modelRef.current]);
+  });
 
-  console.log(gltf.scene);
+  // Set material properties for transparency
+
   return (
-    <mesh castShadow receiveShadow>
-      <primitive
-        ref={modelRef}
-        object={gltf.scene}
-        position={[2, 0, 2.2]}
-        rotation={[0, -Math.PI / 2, 0]}
-      />
+    <mesh
+      position={[2, 0, 2.2]}
+      rotation={[0, -Math.PI / 2, 0]}
+      // position={position}
+      // rotation={rotation}
+      ref={modelRef}
+      castShadow
+      receiveShadow
+      material-opacity={0}
+    >
+      <primitive object={gltf.scene} />
     </mesh>
   );
 };
@@ -136,17 +175,17 @@ const MovingLight = () => {
     }
   });
 
-  return <spotLight ref={lightRef} intensity={2} color="white" castShadow />;
+  return <spotLight ref={lightRef} intensity={2} color='white' castShadow />;
 };
 
 const Model = () => {
   return (
-    <div className=" w-[80vw] h-auto relative bg-black">
-      <div className="fixed w-screen z-[30] h-screen overflow-x-hidden bg-black">
+    <div className=' w-[80vw] h-auto relative bg-black'>
+      <div className='fixed w-screen z-[30] h-screen overflow-x-hidden bg-black'>
         <Canvas shadows>
           <ambientLight intensity={1} />
           <directionalLight position={[0, 10, 0]} intensity={1} castShadow />
-          <Environment preset="sunset" />
+          <Environment preset='sunset' />
           <pointLight position={[0, 0, 0]} intensity={1} />
           <pointLight position={[0, 0, 10]} intensity={1} />
 
@@ -161,13 +200,13 @@ const Model = () => {
       </div>
 
       <section
-        className="trigger"
+        className='trigger'
         data-scroll-section
         style={{ height: "1000vh" }}
       >
-        <div style={{ height: "33.33%" }} className="trigger1"></div>
-        <div style={{ height: "33.33%" }} className="trigger2"></div>
-        <div style={{ height: "33.33%" }} className="trigger3"></div>
+        <div style={{ height: "33%" }} className='trigger1'></div>
+        <div style={{ height: "33%" }} className='trigger2'></div>
+        <div style={{ height: "33%" }} className='trigger3'></div>
       </section>
     </div>
   );
