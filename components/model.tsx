@@ -48,7 +48,7 @@ const ModelComponent = () => {
   if (modelRef.current)
     camera.lookAt(
       modelRef?.current?.position.x,
-      0,
+      0.4,
       modelRef?.current?.position.z
     );
 
@@ -60,53 +60,53 @@ const ModelComponent = () => {
     const t1 = gsap.timeline();
 
     t1.to(camera.position, {
-      x: 1.6,
-      y: 3.3,
-      z: -4.6,
+      x: 0,
+      y: 1.7,
+      z: -3.8,
       duration: 1,
       onUpdate: () => {
         camera.lookAt(
           modelRef.current.position.x,
-          0,
+          0.4,
           modelRef.current.position.z
         );
       },
     })
       .to(camera.position, {
-        x: 1.2,
-        y: 3.3,
-        z: -6.6,
-        delay: 0.2,
+        x: -1.5,
+        y: 2,
+        z: -4.8,
         duration: 1,
         onUpdate: () => {
           camera.lookAt(
             modelRef.current.position.x,
-            0,
+            0.4,
             modelRef.current.position.z
           );
         },
       })
       .to(camera.position, {
-        x: 3.1,
-        y: 3,
-        z: -8.6,
+        x: -0.6,
+        y: 2.3,
+        z: -8,
         delay: 0.2,
         duration: 1,
         onUpdate: () => {
           camera.lookAt(
             modelRef.current.position.x,
-            0,
+            0.4,
             modelRef.current.position.z
           );
         },
       })
+
       .to(camera.position, {
         z: -20,
-        delay: 0.5,
+        delay: 0.1,
         onUpdate: () => {
           camera.lookAt(
             modelRef.current.position.x,
-            0,
+            0.4,
             modelRef.current.position.z
           );
         },
@@ -132,17 +132,27 @@ const ModelComponent = () => {
           .material as THREE.MeshStandardMaterial;
         if (material) {
           material.transparent = true;
-          if (progress > 0.78) material.opacity = 1 - (progress - 0.78) * 5;
+          if (progress > 0.8 && material.opacity <= 1)
+            material.opacity = 1 - (progress - 0.8) * 5;
         }
       }
     });
   });
 
+  useEffect(() => {
+    if (modelRef.current)
+      camera.lookAt(
+        modelRef.current.position.x,
+        0.4,
+        modelRef.current.position.z
+      );
+  }, []);
+
   // Set material properties for transparency
 
   return (
     <mesh
-      position={[2.5, 0, -5.5]}
+      position={[0, 0, -5.5]}
       rotation={[0, -Math.PI / 2, 0]}
       ref={modelRef}
       castShadow
@@ -176,7 +186,7 @@ const MovingLight = () => {
 const Model = () => {
   return (
     <div className=' w-[80vw] h-auto relative bg-black'>
-      <div className='fixed w-screen z-[30] h-screen overflow-x-hidden bg-black'>
+      <div className='fixed right-0 w-[70%] z-[30] h-screen overflow-x-hidden bg-black'>
         <Canvas
           camera={{
             position: [0, 0, 5],
