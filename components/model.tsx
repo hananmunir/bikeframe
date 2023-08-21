@@ -49,14 +49,14 @@ const ModelComponent = () => {
     },
   });
 
-  camera.position.set(position[0], position[1], position[2]);
-  camera.rotation.set(rotation[0], rotation[1], rotation[2]);
-  if (modelRef.current)
-    camera.lookAt(
-      modelRef?.current?.position.x,
-      0.4,
-      modelRef?.current?.position.z
-    );
+  // camera.position.set(position[0], position[1], position[2]);
+  // camera.rotation.set(rotation[0], rotation[1], rotation[2]);
+  // if (modelRef.current)
+  //   camera.lookAt(
+  //     modelRef?.current?.position.x,
+  //     0.4,
+  //     modelRef?.current?.position.z
+  //   );
 
   let progress = 0;
   useEffect(() => {
@@ -67,10 +67,11 @@ const ModelComponent = () => {
 
     t1.to(camera.position, {
       x: 0,
-      y: 3.7,
+      y: 2.4,
       // z: -3.8,
-      z: -4.3,
+      z: -3.3,
       duration: 1,
+
       onUpdate: () => {
         camera.lookAt(
           modelRef.current.position.x,
@@ -173,29 +174,10 @@ const ModelComponent = () => {
   );
 };
 
-const MovingLight = () => {
-  const lightRef = useRef<THREE.SpotLight>(null);
-
-  // Use the useFrame hook to update the light position on each frame
-  useFrame((state, delta) => {
-    if (lightRef.current) {
-      // Update the light's position here
-      // You can change the light's position based on time or any other parameter
-      const time = state.clock.elapsedTime;
-      const radius = 15;
-      const xPos = radius * Math.cos(time * 0.5);
-      const zPos = radius * Math.sin(time * 0.5);
-      lightRef.current.position.set(xPos, 0, zPos);
-    }
-  });
-
-  return <spotLight ref={lightRef} intensity={2} color="white" castShadow />;
-};
-
 const Model = () => {
   return (
-    <div className=" w-[80vw] h-auto relative bg-black">
-      <div className="fixed right-0 w-[100%] z-[30] h-screen overflow-x-hidden bg-black">
+    <div className=' w-[80vw] h-auto relative bg-black'>
+      <div className='fixed right-0 w-[100%] z-[30] h-screen overflow-x-hidden bg-black'>
         <Canvas
           camera={{
             position: [0, 0, 5],
@@ -205,28 +187,22 @@ const Model = () => {
         >
           <ambientLight intensity={1} />
           <directionalLight position={[0, 20, 0]} intensity={1} castShadow />
-          <Environment preset="warehouse" />
-          {/* <pointLight position={[0, 0, 0]} intensity={1} />
-          <pointLight position={[0, 0, 10]} intensity={1} /> */}
-
-          {/* <PresentationControls> */}
+          <Environment preset='warehouse' />
 
           <Suspense fallback={null}>
             <ModelComponent />
           </Suspense>
-
-          {/* </PresentationControls> */}
         </Canvas>
       </div>
 
       <section
-        className="trigger"
+        className='trigger'
         data-scroll-section
         style={{ height: "1000vh" }}
       >
-        <div style={{ height: "33%" }} className="trigger1"></div>
-        <div style={{ height: "33%" }} className="trigger2"></div>
-        <div style={{ height: "33%" }} className="trigger3"></div>
+        <div style={{ height: "33%" }} className='trigger1'></div>
+        <div style={{ height: "33%" }} className='trigger2'></div>
+        <div style={{ height: "33%" }} className='trigger3'></div>
       </section>
     </div>
   );
