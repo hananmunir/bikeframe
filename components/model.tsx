@@ -22,16 +22,22 @@ const ModelComponent = () => {
       const mesh = node as THREE.Mesh;
       const material = (node as THREE.Mesh)
         .material as THREE.MeshStandardMaterial;
+
       if (material) {
         material.roughness = 0.4;
+        if (mesh.name === "BASE_PLATE_1") {
+          material.roughness = 1;
+        }
       }
 
+      // console.log(mesh.name);
       // Shadows
       mesh.castShadow = true;
       mesh.receiveShadow = true;
     }
   });
 
+  console.log(gltf.scene);
   const { position, rotation } = useControls("Camera", {
     position: {
       value: [0, 0, 5],
@@ -61,8 +67,9 @@ const ModelComponent = () => {
 
     t1.to(camera.position, {
       x: 0,
-      y: 1.7,
-      z: -3.8,
+      y: 3.7,
+      // z: -3.8,
+      z: -4.3,
       duration: 1,
       onUpdate: () => {
         camera.lookAt(
@@ -74,8 +81,9 @@ const ModelComponent = () => {
     })
       .to(camera.position, {
         x: -1.5,
-        y: 2,
-        z: -4.8,
+        y: 3,
+        // z: -4.8,
+        z: -5.3,
         duration: 1,
         onUpdate: () => {
           camera.lookAt(
@@ -87,8 +95,9 @@ const ModelComponent = () => {
       })
       .to(camera.position, {
         x: -0.6,
-        y: 2.3,
-        z: -8,
+        y: 3.3,
+        // z: -8,
+        z: -8.5,
         delay: 0.2,
         duration: 1,
         onUpdate: () => {
@@ -152,7 +161,7 @@ const ModelComponent = () => {
 
   return (
     <mesh
-      position={[0, 0, -5.5]}
+      position={[0, 0, -6]}
       rotation={[0, -Math.PI / 2, 0]}
       ref={modelRef}
       castShadow
@@ -180,13 +189,13 @@ const MovingLight = () => {
     }
   });
 
-  return <spotLight ref={lightRef} intensity={2} color='white' castShadow />;
+  return <spotLight ref={lightRef} intensity={2} color="white" castShadow />;
 };
 
 const Model = () => {
   return (
-    <div className=' w-[80vw] h-auto relative bg-black'>
-      <div className='fixed right-0 w-[70%] z-[30] h-screen overflow-x-hidden bg-black'>
+    <div className=" w-[80vw] h-auto relative bg-black">
+      <div className="fixed right-0 w-[100%] z-[30] h-screen overflow-x-hidden bg-black">
         <Canvas
           camera={{
             position: [0, 0, 5],
@@ -195,10 +204,10 @@ const Model = () => {
           shadows
         >
           <ambientLight intensity={1} />
-          <directionalLight position={[0, 10, 0]} intensity={1} castShadow />
-          <Environment preset='sunset' />
-          <pointLight position={[0, 0, 0]} intensity={1} />
-          <pointLight position={[0, 0, 10]} intensity={1} />
+          <directionalLight position={[0, 20, 0]} intensity={1} castShadow />
+          <Environment preset="warehouse" />
+          {/* <pointLight position={[0, 0, 0]} intensity={1} />
+          <pointLight position={[0, 0, 10]} intensity={1} /> */}
 
           {/* <PresentationControls> */}
 
@@ -211,13 +220,13 @@ const Model = () => {
       </div>
 
       <section
-        className='trigger'
+        className="trigger"
         data-scroll-section
         style={{ height: "1000vh" }}
       >
-        <div style={{ height: "33%" }} className='trigger1'></div>
-        <div style={{ height: "33%" }} className='trigger2'></div>
-        <div style={{ height: "33%" }} className='trigger3'></div>
+        <div style={{ height: "33%" }} className="trigger1"></div>
+        <div style={{ height: "33%" }} className="trigger2"></div>
+        <div style={{ height: "33%" }} className="trigger3"></div>
       </section>
     </div>
   );
