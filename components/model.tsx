@@ -140,10 +140,21 @@ const ModelComponent = () => {
         const mesh = node as THREE.Mesh;
         const material = (node as THREE.Mesh)
           .material as THREE.MeshStandardMaterial;
+        // if (material) {
+        //   material.transparent = true;
+        //   if (progress > 0.8 && material.opacity <= 1) {
+        //     material.opacity = 1 - (progress - 0.8) * 5;
+        //   }
         if (material) {
           material.transparent = true;
-          if (progress > 0.8 && material.opacity <= 1)
+
+          if (progress > 0.98) {
+            material.opacity = 0;
+          } else if (progress < 0.8) {
+            material.opacity = 1;
+          } else {
             material.opacity = 1 - (progress - 0.8) * 5;
+          }
         }
       }
     });
@@ -176,8 +187,8 @@ const ModelComponent = () => {
 
 const Model = () => {
   return (
-    <div className=' w-[80vw] h-auto relative bg-black'>
-      <div className='fixed right-0 w-[100%] z-[30] h-screen overflow-x-hidden bg-black'>
+    <div className=" w-[80vw] h-auto relative bg-black">
+      <div className="fixed right-0 w-[100%] z-[30] h-screen overflow-x-hidden bg-black">
         <Canvas
           camera={{
             position: [0, 0, 5],
@@ -187,7 +198,7 @@ const Model = () => {
         >
           <ambientLight intensity={1} />
           <directionalLight position={[0, 20, 0]} intensity={1} castShadow />
-          <Environment preset='warehouse' />
+          <Environment preset="warehouse" />
 
           <Suspense fallback={null}>
             <ModelComponent />
@@ -196,13 +207,13 @@ const Model = () => {
       </div>
 
       <section
-        className='trigger'
+        className="trigger"
         data-scroll-section
         style={{ height: "1000vh" }}
       >
-        <div style={{ height: "33%" }} className='trigger1'></div>
-        <div style={{ height: "33%" }} className='trigger2'></div>
-        <div style={{ height: "33%" }} className='trigger3'></div>
+        <div style={{ height: "33%" }} className="trigger1"></div>
+        <div style={{ height: "33%" }} className="trigger2"></div>
+        <div style={{ height: "33%" }} className="trigger3"></div>
       </section>
     </div>
   );
